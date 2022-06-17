@@ -1,0 +1,16 @@
+{
+  "name": "game",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {},
+  "devDependencies": {
+    "@types/node": "^17.0.33",
+    "browser-sync": "^2.27.9",
+    "browserify": "^17.0.0",
+    "gulp": "^4.0.2",
+    "gulp-sourcemaps": "^3.0.0",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0",
+    "watchify": "^4.0.0"
+  }
+}
