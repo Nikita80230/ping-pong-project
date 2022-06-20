@@ -6,6 +6,7 @@ var sourcemaps = require('gulp-sourcemaps');
 
 var browserSync = require('browser-sync').create();
 var browserify = require('browserify');
+var tsify = require('tsify');
 var watchify = require('watchify');
 
 
@@ -19,6 +20,7 @@ function createBundler() {
 		entries: ['sources/main.js'],
 		debug: true
 	})
+	.plugin(tsify);
 }
 
 function destJS(bundler) {
@@ -37,31 +39,6 @@ function buildJS() {
 };
 
 function runServer(done) {
-	const watchedBrowserify = watchify(createBundler());
-	const build = () => destJS(watchedBrowserify);
-
-	browserSync.init({
-    server: {
-			baseDir: "./dist/",
-		},
-		ui: false,
-		notify: false,
-		logFileChanges: true,
-		ghostMode: false
-  });
-
-	watchedBrowserify
-	.on('log', console.log)
-	.on('update', async(files) => {
-		console.log(files[0]);
-    await build();
-    browserSync.reload();
-	});
-
-	return build();
-}
-
-function run2Server(done) {
 	const watchedBrowserify = watchify(createBundler());
 	const build = () => destJS(watchedBrowserify);
 	let isChange = false;
@@ -96,5 +73,4 @@ function run2Server(done) {
 	return build();
 }
 
-exports.run = gulp.series(buildHTML, runServer);
-exports.run2 = gulp.series(buildHTML, run2Server);
+exports.run = gulp.series(buildHTML, buildJS, runServer);

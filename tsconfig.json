@@ -1,0 +1,12 @@
+{
+	"title": "JSON schema for the TypeScript compiler's configuration file",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+	"compilerOptions": {
+		"target":                 "ES5",
+		"esModuleInterop": 				true,
+    "downlevelIteration":     true,
+    "experimentalDecorators": true,
+		"allowJs":								true,
+    "lib":                    ["ESNEXT", "DOM"]
+	}
+}
