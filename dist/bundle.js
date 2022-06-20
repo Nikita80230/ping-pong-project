@@ -43746,22 +43746,39 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var PIXI = __importStar(require("pixi.js"));
-var width = window.innerWidth;
-var height = window.innerHeight;
-var app;
-var model = {
-    createCanvas: function () {
-        app = new PIXI.Application(width, height);
-        document.body.appendChild(app.view);
+// let width = window.innerWidth;
+// let height = window.innerHeight;
+// let app;
+// let model = {
+//     createCanvas: function() {
+//         app = new PIXI.Application(width, height);
+//         document.body.appendChild(app.view); 
+//     }
+// }
+// model.createCanvas();
+// var view = {
+// 	loadGame: function(){
+// 		model.createCanvas();
+// 	}
+// }
+// view.loadGame();
+var app = new PIXI.Application();
+document.body.appendChild(app.view);
+var ball = new PIXI.Graphics();
+ball.beginFill(0xFFFFFF);
+ball.drawRect(0, 0, 10, 10);
+ball.x = app.screen.width / 2;
+ball.y = app.screen.height / 2;
+app.stage.addChild(ball);
+function ballMove() {
+    ball.x += 1;
+    setTimeout(function () { return ballMove(); }, 10);
+    if (ball.x > app.screen.width) {
+        ball.x = -ball.x;
+        setTimeout(function () { return ballMove(); }, 10);
     }
-};
-model.createCanvas();
-var view = {
-    loadGame: function () {
-        model.createCanvas();
-    }
-};
-view.loadGame();
+}
+// ballMove();
 },{"pixi.js":41}]},{},[51])
 
 //# sourceMappingURL=bundle.js.map
