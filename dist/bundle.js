@@ -43770,15 +43770,35 @@ ball.drawRect(0, 0, 10, 10);
 ball.x = app.screen.width / 2;
 ball.y = app.screen.height / 2;
 app.stage.addChild(ball);
+function moveLeft() {
+    ball.x -= 1;
+    setTimeout(function () { return moveLeft(); }, 10);
+}
+function moveRight() {
+    ball.x += 1;
+    setTimeout(function () { return moveRight(); }, 10);
+}
 function ballMove() {
     ball.x += 1;
     setTimeout(function () { return ballMove(); }, 10);
-    if (ball.x > app.screen.width) {
-        ball.x = -ball.x;
-        setTimeout(function () { return ballMove(); }, 10);
+    if (ball.x + 10 >= app.screen.width) {
+        ball.x -= 1;
+        setTimeout(function () { return moveLeft(); }, 10);
     }
+    if (ball.x <= 0) {
+        ball.x += 1;
+        setTimeout(function () { return moveRight(); }, 10);
+    }
+    // if (ball.x >= 0 && ball.x < app.screen.width) {
+    //     moveRight();    
+    // } else if(ball.x === app.screen.width) {
+    //     moveLeft(); 
+    // }
+    // // if (ball.x === app.screen.width) {
+    // //     moveLeft();    
+    // // }
 }
-// ballMove();
+ballMove();
 },{"pixi.js":41}]},{},[51])
 
 //# sourceMappingURL=bundle.js.map
