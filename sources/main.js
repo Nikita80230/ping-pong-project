@@ -40,28 +40,22 @@ app.stage.addChild(ball);
 
 function moveLeft() {
     ball.x -= 1;
-    setTimeout(() => moveLeft(), 10);
+
+    if (ball.x <= 0) {
+        setTimeout(() => moveRight(), 10);    
+    } else {
+        setTimeout(() => moveLeft(), 10);    
+    }
 }
 
 function moveRight() {
     ball.x += 1;
-    setTimeout(() => moveRight(), 10);
-}
-
-function ballMove() {
-    ball.x += 1;
-    setTimeout(() => ballMove(), 10);
 
     if (ball.x + 10 >= app.screen.width) {
-        ball.x -= 1;
         setTimeout(() => moveLeft(), 10);
-    }
-    if (ball.x <= 0) {
-        ball.x += 1;
-        setTimeout(() => moveRight(), 10);
+    } else {
+        setTimeout(() => moveRight(), 10);    
     }
 }
 
-
-
-ballMove();
+moveRight();
