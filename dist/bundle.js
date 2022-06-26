@@ -43746,49 +43746,41 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var PIXI = __importStar(require("pixi.js"));
-// let width = window.innerWidth;
-// let height = window.innerHeight;
-// let app;
-// let model = {
-//     createCanvas: function() {
-//         app = new PIXI.Application(width, height);
-//         document.body.appendChild(app.view); 
-//     }
-// }
-// model.createCanvas();
-// var view = {
-// 	loadGame: function(){
-// 		model.createCanvas();
-// 	}
-// }
-// view.loadGame();
 var app = new PIXI.Application();
 document.body.appendChild(app.view);
-var ball = new PIXI.Graphics();
-ball.beginFill(0xFFFFFF);
-ball.drawRect(0, 0, 10, 10);
-ball.x = app.screen.width / 2;
-ball.y = app.screen.height / 2;
-app.stage.addChild(ball);
-function moveLeft() {
-    ball.x -= 1;
-    if (ball.x <= 0) {
-        setTimeout(function () { return moveRight(); }, 10);
+var Ball = /** @class */ (function () {
+    function Ball() {
+        this.ball = new PIXI.Graphics();
+        this.ball.beginFill(0xFFFFFF);
+        this.ball.drawRect(0, 0, 10, 10);
+        this.ball.x = app.screen.width / 2;
+        this.ball.y = app.screen.height / 2;
+        this.directionX = 0;
+        this.directionY = 0;
+        app.stage.addChild(this.ball);
+    }
+    Ball.prototype.move = function () {
+        var _this = this;
+        this.ball.x += this.directionX;
+        this.ball.y += this.directionY;
+        setTimeout(function () { return _this.move(); }, 10);
+    };
+    return Ball;
+}());
+var ball1 = new Ball();
+ball1.directionX = -1;
+ball1.move();
+var time = 0;
+function changeDirectionX() {
+    if (ball1.directionX == 1) {
+        ball1.directionX = -1;
     }
     else {
-        setTimeout(function () { return moveLeft(); }, 10);
+        ball1.directionX = 1;
     }
+    setTimeout(function () { return changeDirectionX(); }, 8000);
 }
-function moveRight() {
-    ball.x += 1;
-    if (ball.x + 10 >= app.screen.width) {
-        setTimeout(function () { return moveLeft(); }, 10);
-    }
-    else {
-        setTimeout(function () { return moveRight(); }, 10);
-    }
-}
-moveRight();
+setTimeout(function () { return changeDirectionX(); }, 4000);
 },{"pixi.js":41}]},{},[51])
 
 //# sourceMappingURL=bundle.js.map
