@@ -43721,6 +43721,30 @@ module.exports = {
 
 },{}],51:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.animator = void 0;
+function animator(time, parameters) {
+    return new Promise(function (resolve, reject) {
+        var onUpdate = parameters.onUpdate;
+        var startTime = performance.now();
+        var update = function () {
+            var nowTime = performance.now();
+            var progress = (nowTime - startTime) / time;
+            if (progress < 1) {
+                onUpdate(progress);
+                requestAnimationFrame(function () { return update(); });
+            }
+            else {
+                onUpdate(1);
+                resolve();
+            }
+        };
+        requestAnimationFrame(function () { return update(); });
+    });
+}
+exports.animator = animator;
+},{}],52:[function(require,module,exports){
+"use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -43746,8 +43770,36 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var PIXI = __importStar(require("pixi.js"));
+var animator_1 = require("./animator");
+window.animator = animator_1.animator;
 var app = new PIXI.Application();
 document.body.appendChild(app.view);
+var graphics = new PIXI.Graphics();
+graphics.beginFill(0xFFFFFF);
+graphics.drawRect(app.screen.width / 2, 0, 10, 800);
+app.stage.addChild(graphics);
+var style = new PIXI.TextStyle({
+    fontFamily: 'Arial',
+    fontSize: 36,
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    fill: ['#ffffff', '#00ff99'],
+    stroke: '#4a1850',
+    strokeThickness: 5,
+    dropShadow: true,
+    dropShadowColor: '#000000',
+    dropShadowBlur: 4,
+    dropShadowAngle: Math.PI / 6,
+    dropShadowDistance: 6,
+    wordWrap: true,
+    wordWrapWidth: 440,
+    lineJoin: 'round',
+});
+var basicText = new PIXI.Text("Score: 0", style);
+basicText.x = app.screen.width / 2;
+basicText.y = 30;
+basicText.anchor.set(0.5, 0);
+var score = 0;
 var Ball = /** @class */ (function () {
     function Ball() {
         this.ball = new PIXI.Graphics();
@@ -43755,32 +43807,129 @@ var Ball = /** @class */ (function () {
         this.ball.drawRect(0, 0, 10, 10);
         this.ball.x = app.screen.width / 2;
         this.ball.y = app.screen.height / 2;
-        this.directionX = 0;
-        this.directionY = 0;
         app.stage.addChild(this.ball);
     }
-    Ball.prototype.move = function () {
+    Ball.prototype.moveToX = function (endX) {
         var _this = this;
-        this.ball.x += this.directionX;
-        this.ball.y += this.directionY;
-        setTimeout(function () { return _this.move(); }, 10);
+        var distance = Math.sqrt(Math.pow((endX - this.ball.x), 2));
+        // скорость 100 пикселей в 1 секунду (1000мс) 
+        var speed = 10;
+        var time = distance * speed;
+        var startX = this.ball.x;
+        var onUpdate = function (progress) {
+            _this.ball.x = (endX - startX) * progress + startX;
+        };
+        (0, animator_1.animator)(time, { onUpdate: onUpdate })
+            .then(function () { return _this.startMoveX(); })
+            .catch(function () { });
+    };
+    Ball.prototype.startMoveX = function () {
+        // move left 
+        var endX;
+        var leftPosition = this.player.visial.x + this.player.visial.width;
+        var rightPosition = app.screen.width - this.ball.width - (app.screen.width - this.bot.visial.x);
+        // if (this.ball.x === leftPosition) {
+        //   endX = rightPosition;
+        // } else {
+        //   endX = leftPosition;
+        // }
+        if (this.ball.x === app.screen.width / 2) {
+            endX = leftPosition;
+        }
+        else if (this.ball.x === leftPosition) {
+            if (this.ball.y >= this.player.visial.y - 10 && this.ball.y <= this.player.visial.y + 70) {
+                endX = rightPosition;
+            }
+            else {
+                endX = 0;
+                score += 1;
+                basicText.text = "Score: ".concat(score);
+            }
+        }
+        else if (this.ball.x === rightPosition) {
+            endX = leftPosition;
+        }
+        else {
+            this.ball.x = app.screen.width / 2;
+            endX = rightPosition;
+        }
+        this.moveToX(endX);
+    };
+    Ball.prototype.moveToY = function (endY) {
+        var _this = this;
+        var distance = Math.sqrt(Math.pow((endY - this.ball.y), 2));
+        var speed = 10;
+        var time = distance * speed;
+        var startY = this.ball.y;
+        var onUpdate = function (progress) {
+            _this.ball.y = (endY - startY) * progress + startY;
+        };
+        (0, animator_1.animator)(time, { onUpdate: onUpdate })
+            .then(function () { return _this.startMoveY(); })
+            .catch(function () { });
+    };
+    Ball.prototype.startMoveY = function () {
+        var endY;
+        if (this.ball.y === 0) {
+            endY = app.screen.height - this.ball.height;
+        }
+        else {
+            endY = 0;
+        }
+        this.moveToY(endY);
+    };
+    Ball.prototype.addPlayer = function (player) {
+        this.player = player;
+    };
+    Ball.prototype.addBot = function (bot) {
+        this.bot = bot;
     };
     return Ball;
 }());
 var ball1 = new Ball();
-ball1.directionX = -1;
-ball1.move();
-var time = 0;
-function changeDirectionX() {
-    if (ball1.directionX == 1) {
-        ball1.directionX = -1;
+var Player = /** @class */ (function () {
+    function Player() {
+        var _this = this;
+        this.visial = new PIXI.Graphics();
+        this.visial.beginFill(0xFFFFFF);
+        this.visial.drawRect(0, 0, 10, 70);
+        this.visial.x = 30;
+        this.visial.y = app.screen.height / 2 - 70 / 2;
+        app.stage.addChild(this.visial);
+        document.addEventListener('mousemove', function (event) {
+            if (event.clientY > 0 && event.clientY <= app.screen.height - 71) {
+                _this.visial.y = event.clientY;
+            }
+        });
     }
-    else {
-        ball1.directionX = 1;
+    return Player;
+}());
+var player1 = new Player;
+var Bot = /** @class */ (function () {
+    function Bot() {
+        this.visial = new PIXI.Graphics();
+        this.visial.beginFill(0xFFFFFF);
+        this.visial.drawRect(0, 0, 10, 70);
+        this.visial.x = app.screen.width - 30;
+        this.visial.y = app.screen.height / 2 - 70 / 2;
+        app.stage.addChild(this.visial);
     }
-    setTimeout(function () { return changeDirectionX(); }, 8000);
+    return Bot;
+}());
+var bot1 = new Bot;
+function upDate() {
+    if (ball1.ball.y > 34 && ball1.ball.y < app.screen.height - 45) {
+        bot1.visial.y = ball1.ball.y - 30;
+    }
+    requestAnimationFrame(function () { return upDate(); });
 }
-setTimeout(function () { return changeDirectionX(); }, 4000);
-},{"pixi.js":41}]},{},[51])
+;
+upDate();
+ball1.addPlayer(player1);
+ball1.addBot(bot1);
+ball1.startMoveY();
+ball1.startMoveX();
+app.stage.addChild(basicText);
+},{"./animator":51,"pixi.js":41}]},{},[52])
 
 //# sourceMappingURL=bundle.js.map
